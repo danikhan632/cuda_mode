@@ -23,7 +23,7 @@ module sparse_mm #(
     generate
         for (int i = 0; i < M; i++) begin
             for (int j = 0; j < N; j++) begin
-                MAC #(.N = N) mac(
+                MAC #(.N = N, ) mac(
                     .clk(clk),
                     .buffer(buffers[i][j]),
                     
