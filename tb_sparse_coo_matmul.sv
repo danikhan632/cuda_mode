@@ -4,10 +4,14 @@ module tb_sparse_coo_matmul();
 
     // Testbench signals
     logic clk;
-    logic [7:0][7:0] C;  // FP32 result matrix C
+    logic rst;
+    
+    // 8x8 matrix of 32-bit elements (FP32 format)
+    logic [31:0][7:0][7:0] C;  
 
     // Instantiate the Unit Under Test (UUT)
     sparse_coo_matmul uut (
+        .rst(rst),
         .clk(clk),
         .C(C)
     );
@@ -17,12 +21,12 @@ module tb_sparse_coo_matmul();
         #5 clk <= ~clk;  // 100 MHz clock
     end
 
-    // Debug: Print matrix values
+    // Optional: Print matrix values if needed to avoid the unused signal warning
     task print_matrix;
         $display("Resulting Matrix C:");
         for (int i = 0; i < 8; i++) begin
             for (int j = 0; j < 8; j++) begin
-                $display("C[%0d][%0d] = %f", i, j, $bitstoreal(C[i][j]));
+                $display("C[%0d][%0d] = %d", i, j, C[i][j]);
             end
         end
     endtask
@@ -31,8 +35,11 @@ module tb_sparse_coo_matmul();
     initial begin
         // Initialize inputs
         $dumpfile("trace.vcd");
-        $dumpvars(0, tb_sparse_coo_matmul);
+        $dumpvars();
         clk = 0;
+        rst = 1;
+        repeat(10) @(posedge clk);
+        rst = 0;
 
         // Initialize the matrices A and B in the UUT using FP8 values
         // A matrix encoded in FP8 (E4M3)
@@ -50,6 +57,10 @@ module tb_sparse_coo_matmul();
         uut.B_data[1] = 8'b01000000; uut.B_row[1] = 1; uut.B_col[1] = 1; uut.B_valid[1] = 1;
         uut.B_data[2] = 8'b01001000; uut.B_row[2] = 2; uut.B_col[2] = 2; uut.B_valid[2] = 1;
         uut.B_data[3] = 8'b01010000; uut.B_row[3] = 3; uut.B_col[3] = 3; uut.B_valid[3] = 1;
+        uut.B_data[4] = 8'b01011000; uut.B_row[4] = 1; uut.B_col[4] = 1; uut.B_valid[4] = 1;
+        uut.B_data[5] = 8'b01100000; uut.B_row[5] = 1; uut.B_col[5] = 2; uut.B_valid[5] = 1;
+        uut.B_data[6] = 8'b01101000; uut.B_row[6] = 2; uut.B_col[6] = 0; uut.B_valid[6] = 1;
+        uut.B_data[7] = 8'b01110000; uut.B_row[7] = 2; uut.B_col[7] = 1; uut.B_valid[7] = 1;
 
         // Mark unused elements as invalid in both A and B matrices
         for (int i = 8; i < 32; i++) begin
@@ -58,19 +69,14 @@ module tb_sparse_coo_matmul();
         end
 
         // Simulation start
-        $display("Starting simulation...");
-
         // Run the simulation for 100 clock cycles
         repeat(10) @(posedge clk);
         
-        $display("After 100 clock cycles:");
-        print_matrix();
+        // Optionally print matrix after simulation
+        // print_matrix();
 
         // Run for another 100 clock cycles
         repeat(100) @(posedge clk);
-
-        $display("After 200 clock cycles:");
-        print_matrix();
 
         // Finish the simulation
         $finish;

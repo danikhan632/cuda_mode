@@ -1,0 +1,11 @@
+# Read your Verilog files
+read_verilog tb_sparse_coo_matmul.sv sparse_coo_matmul.sv
+
+# Set the top module (in your case, it's tb_sparse_coo_matmul)
+hierarchy -check -top tb_sparse_coo_matmul
+
+# Run synthesis
+synth -top tb_sparse_coo_matmul
+
+# Optional: Write the synthesized design to a file (e.g., gate-level netlist in Verilog)
+write_verilog synthesized_output.v
