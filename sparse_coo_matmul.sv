@@ -66,15 +66,22 @@ module sparse_coo_matmul(
                     for (j = 0; j < 32; j = j + 1) begin
                         if (B_valid[j] && (A_col[i] == B_row[j])) begin
                             // Convert FP8 to real, multiply, and accumulate
+                
                             real a_real, b_real, mul_result;
                             a_real = fp8_to_real(A_data[i]);
+                        //    $display("world %f", a_real);
+
                             b_real = fp8_to_real(B_data[j]);
                             mul_result = a_real * b_real;
 
+                            // $display("men %f", mul_result);
+
                             // Convert mul_result to bits, truncate to 32 bits, and accumulate
-                            mul_result_bits <= $realtobits(mul_result)[31:0];  // Convert real to FP32 bits
+                            mul_result_bits <= $realtobits(mul_result)[63:32];  // Convert real to FP32 bits
+                            $display("a_real * b_real = mul_result -- %f * %f = %f (%f)", a_real, b_real, mul_result, mul_result_bits);
 
                             c_mul[A_row[i]][B_col[j]] <= c_mul[A_row[i]][B_col[j]] + mul_result_bits;
+                            //$display("hello %d",mul_result_bits);
                         end
                     end
                 end

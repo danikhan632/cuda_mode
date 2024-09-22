@@ -67,13 +67,14 @@ module tb_sparse_coo_matmul();
             uut.A_valid[i] = 0;
             uut.B_valid[i] = 0;
         end
-
+        
+        
         // Simulation start
         // Run the simulation for 100 clock cycles
         repeat(10) @(posedge clk);
         
         // Optionally print matrix after simulation
-        // print_matrix();
+        print_matrix();
 
         // Run for another 100 clock cycles
         repeat(100) @(posedge clk);
